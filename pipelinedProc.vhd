@@ -34,7 +34,7 @@ architecture rtl of pipelinedProc is
   signal pc4, pcValue,IFIDpc_in,IFIDpc_out,jumpAddr,branchAddr : std_logic_vector(7 downto 0);
   signal muxAddrSelect : std_logic_vector(1 downto 0);
   signal IFIDinstruction_in,IFIDinstruction_out,IDinstruction_out,EXinstruction_out,MEMinstruction_out,WBinstruction_out : std_logic_vector(31 downto 0);
-  signal flush,IFIDen : std_logic;
+  signal flush,IFIDen,en : std_logic;
   
   -- ID stage --
   signal RegDst,BranchEQ,BranchNotEQ,Jump,MemRead,MemtoReg,MemWrite,ALUSrc,RegWrite,muxControlUnitSelect,compEQ : std_logic;
@@ -388,9 +388,9 @@ architecture rtl of pipelinedProc is
   
   
                             -- IF --
-                            
+                en <= IFIDen or not(GReset);            
 		pc : entity work.bidirectional_shift_register_8bits(rtl)
-				port map(pc4, '0', '0', '0', IFIDen, GReset, clk1M, pcValue);
+				port map(pc4, '0', '0', '0', en, GReset, clk1M, pcValue);
 		
 		pcAddJ : entity work.eigthbit_adder(rtl)
 					port map(pcValue,"00000100",'0',IFIDpc_in);
@@ -408,7 +408,7 @@ architecture rtl of pipelinedProc is
 								outclock => GClock);
 								
 		buff1 : entity work.IFIDbuffer(rtl)
-		          port map(IFIDpc_in,IFIDinstruction_in,clk1M,GReset,IFIDen,flush,IFIDpc_out,IFIDinstruction_out);				
+		          port map(IFIDpc_in,IFIDinstruction_in,clk1M,GReset,en,flush,IFIDpc_out,IFIDinstruction_out);				
 		          
 		          	
 		                        -- ID --			
